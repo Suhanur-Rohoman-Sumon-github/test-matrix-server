@@ -2,7 +2,7 @@
 import mongoose from 'mongoose';
 import {   TUser } from './user.interface';
 import {  userModel } from './user.model';
-
+import crypto from "crypto";
 import httpStatus from 'http-status';
 import AppError from '../../error/AppEroor';
 
@@ -13,40 +13,38 @@ import { sendEmail } from '../../utils/sendEmail';
 
 
 
-const createUserInDB = async (payload: TUser) => {
-   const newUser = payload;
+const createUserInDB = async (payload: Partial<TUser>) => {
+  // Generate a 6-digit numeric verification code
+  const verificationCode = crypto.randomInt(100000, 999999).toString();
 
-    // ✅ Ensure a unique ID if required by schema
-    // newUser.id = await generateUserId(); 
+  // Add verification code and emailVerified: false
+  const newUserData = {
+    ...payload,
+    emailVerified: false,
+    emailVerificationCode: verificationCode,
+  };
 
-   
+  // Create user
+  const newUser = await userModel.create(newUserData);
 
-    const result = await userModel.create(newUser);
-    
+  // Send verification email (async, don’t block)
+  sendEmail(
+    newUser.email,
+    `
+      <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: #f4f4f4;">
+        <div style="background-color: white; padding: 20px; border-radius: 8px; text-align: center;">
+          <h2 style="color: #333;">Verify Your Email Address</h2>
+          <p style="color: #555;">Thanks for signing up! Please verify your email address by using the code below:</p>
+          <h3 style="color: #6bdaff;">${verificationCode}</h3>
+          <p style="color: #999; margin-top: 20px;">If you did not request this, you can safely ignore this email.</p>
+        </div>
+        <p style="text-align: center; color: #aaa; font-size: 12px; margin-top: 20px;">© Test Matrix. All rights reserved.</p>
+      </div>
+    `,
+    "Your email verification code"
+  ).catch((err) => console.error("Failed to send email:", err));
 
-    return result;
- 
-
- 
-
-  // Send verification email with the verification code
- 
-
-  // await sendEmail(newUser.email, `
-  //   <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: #f4f4f4;">
-  //     <div style="background-color: white; padding: 20px; border-radius: 8px; text-align: center;">
-  //       <h2 style="color: #333;">Verify Your Email Address</h2>
-  //       <p style="color: #555;">Thanks for signing up! Please verify your email address by using the code below:</p>
-  //       <h3 style="color: #4CAF50;">${verificationCode}</h3>
-  //       <p style="color: #555;">Alternatively, you can click the button below to verify:</p>
-       
-  //       <p style="color: #999; margin-top: 20px;">If you did not request this, you can safely ignore this email.</p>
-  //     </div>
-  //     <p style="text-align: center; color: #aaa; font-size: 12px; margin-top: 20px;">© 2025 Your Company. All rights reserved.</p>
-  //   </div>
-  // `,'your email verification code');
-
-  return result;
+  return newUser;
 };
 
 
@@ -111,11 +109,6 @@ const createAdminIntoDB = async (payload: TAdmin) => {
     throw new Error(err);
   }
 };
-
-
-
-
-
 
 // export const getAdminInsightDataFromDb = async () => {
 //   // 1) Date boundaries
@@ -340,16 +333,16 @@ const verifyEmailFromDb = async (code: string) => {
   await user.save();
  await sendEmail(user.email, `
     <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: #f4f4f4;">
-      <div style="background-color: white; padding: 20px; border-radius: 8px; text-align: center;">
-        <h2 style="color: #333;">Verify Your Email Address</h2>
-        <p style="color: #555;">Thanks for signing up! Please verify your email address by using the code below:</p>
-        
-        <p style="color: #555;">Alternatively, you can click the button below to verify:</p>
-       
-        <p style="color: #999; margin-top: 20px;">If you did not request this, you can safely ignore this email.</p>
-      </div>
-      <p style="text-align: center; color: #aaa; font-size: 12px; margin-top: 20px;">© 2025 Your Company. All rights reserved.</p>
-    </div>
+  <div style="background-color: white; padding: 20px; border-radius: 8px; text-align: center;">
+    <h2 style="color: #333;">Welcome to Our Platform!</h2>
+    <p style="color: #555;">Thank you for verifying your email address. We're excited to have you on board!</p>
+    
+    <p style="color: #555;">Explore all the features and start your journey with us today.</p>
+    
+    <p style="color: #999; margin-top: 20px;">If you have any questions, feel free to reach out to our support team anytime.</p>
+  </div>
+  <p style="text-align: center; color: #aaa; font-size: 12px; margin-top: 20px;">© 2025 Test metrix. All rights reserved.</p>
+</div>
   `,'welcome to our platform, your email is verified successfully');
 }
 

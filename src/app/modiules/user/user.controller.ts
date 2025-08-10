@@ -6,6 +6,7 @@ import { UserServices } from './user.service';
 
 const createUser = catchAsync(async (req, res) => {
   const userData = req.body;
+ 
   const result = await UserServices.createUserInDB(userData);
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -70,14 +71,17 @@ const getUserVerificationCode = catchAsync(async (req, res) => {
   });
 });
 const verifyEmail = catchAsync(async (req, res) => {
-   const { code } = req.body;
-   console.log(code);
+   
+
+  const {code } = req.body
+ 
+
   const result = await UserServices.verifyEmailFromDb(code as string);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'email verified successfully',
+    message: 'email verified successfully', 
     data: result,
   });
 });
@@ -94,19 +98,7 @@ const updateMyTeligramChanel = catchAsync(async (req, res) => {
     data: result,
   });
 });
-const getMyChanel = catchAsync(async (req, res) => {
-  const userEmail = req.params.userEmail;
-  
-   
-  const result = await UserServices.getMyChanelFromDb(userEmail);
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'teligram updated successfully',
-    data: result,
-  });
-});
 
 export const userControllers = {
   createUser,
@@ -118,5 +110,5 @@ export const userControllers = {
   getUserVerificationCode,
 
   updateMyTeligramChanel,
-  getMyChanel
+  
 };

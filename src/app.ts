@@ -9,7 +9,17 @@ const app: Application = express();
 
 // parser
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173"], // allow all origins
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-requested-with"],
+    credentials: true, // allow cookies/auth headers if needed
+  })
+);
+
+// Preflight requests for all routes
+
 
 // Application routers
 app.use('/api/v1', router);

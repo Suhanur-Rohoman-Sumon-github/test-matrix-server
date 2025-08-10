@@ -21,6 +21,8 @@ if (!isPasswordValid) {
   throw new AppError(httpStatus.FORBIDDEN, 'Wrong password');
 }
 
+console.log(isPasswordValid);
+
   const isUserDeleted = await userModel.findOne({ isDeleted: true });
 
   if (isUserDeleted) {
@@ -30,11 +32,10 @@ if (!isPasswordValid) {
   const jwtPayload = {
     _id: isUserExists._id,
     userId: isUserExists.id,
-    role: isUserExists.role,
-    username: isUserExists.username,
+   
     name: isUserExists.name,
-    profilePicture: isUserExists.profilePicture,
-    email: isUserExists.email,
+   role:isUserExists.role,
+    email: isUserExists.email, 
     
   };
 
@@ -90,53 +91,48 @@ const getRefreshToken = async (token: string) => {
   return { accessToken };
 };
 
-const changePassword = async (
-  userData: JwtPayload,
-  payload: { oldPassword: string; newPassword: string }
-) => {
-   const isUserExists = await userModel.findOne({ email: userData.email });
-  if (!isUserExists) {
-    throw new AppError(httpStatus.NOT_FOUND, 'user not found');
-  }
-  // checking if the user is exist
+// const changePassword = async (
+//   userData: JwtPayload,
+//   payload: { oldPassword: string; newPassword: string }
+// ) => {
+//    const isUserExists = await userModel.findOne({ email: userData.email });
+//   if (!isUserExists) {
+//     throw new AppError(httpStatus.NOT_FOUND, 'user not found');
+//   }
+//   // checking if the user is exist
   
 
-  if (!isUserExists) {
-    throw new AppError(httpStatus.NOT_FOUND, 'This user is not found!');
-  }
+//   if (!isUserExists) {
+//     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found!');
+//   }
 
-  // checking if the user is blocked
+//   // checking if the user is blocked
 
-  const userStatus = isUserExists?.status;
 
-  if (userStatus === 'BLOCKED') {
-    throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked!');
-  }
+//   //checking if the password is correct
 
-  //checking if the password is correct
+//   if (!(await userModel.isPasswordMatched(payload.oldPassword, isUserExists?.password)))
+//     throw new AppError(httpStatus.FORBIDDEN, 'Password do not matched');
 
-  if (!(await userModel.isPasswordMatched(payload.oldPassword, isUserExists?.password)))
-    throw new AppError(httpStatus.FORBIDDEN, 'Password do not matched');
+//   //hash new password
+//   const newHashedPassword = await bcrypt.hash(
+//     payload.newPassword,
+//     Number(config.bcrypt_salt_round)
+//   );
 
-  //hash new password
-  const newHashedPassword = await bcrypt.hash(
-    payload.newPassword,
-    Number(config.bcrypt_salt_round)
-  );
+//   await userModel.findOneAndUpdate(
+//     {
+//       email: userData.email,
+//       role: userData.role,
+//     },
+//     {
+//       password: newHashedPassword,
+//       passwordChangedAt: new Date(),
+//     }
+//   );
 
-  await userModel.findOneAndUpdate(
-    {
-      email: userData.email,
-      role: userData.role,
-    },
-    {
-      password: newHashedPassword,
-      passwordChangedAt: new Date(),
-    }
-  );
-
-  return null;
-};
+//   return null;
+// };
 // const forgetPassword = async (email: string) => {
 //   // checking if the user is exist
 //   const user = await userModel.findOne({ email: email});
@@ -243,7 +239,7 @@ const changePassword = async (
 export const AuthServices = {
   loginUser,
   getRefreshToken,
-  changePassword,
+  // changePassword,
 //   forgetPassword,
 //   resetPassword
 };

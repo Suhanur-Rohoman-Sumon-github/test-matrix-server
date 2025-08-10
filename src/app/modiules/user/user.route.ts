@@ -15,10 +15,7 @@ router.get(
   '/allUser/pending-approval',
   userControllers.getPendingUsers
 );
-router.get(
-  '/allUser/my-chanel/:userEmail',
-  userControllers.getMyChanel
-);
+
 router.patch(
   '/allUser/update-Chanel/:userEmail',
   userControllers.updateMyTeligramChanel

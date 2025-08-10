@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 import { TUser } from "./user.interface";
-
+import bcrypt from 'bcrypt'
 
 
 const UserSchema = new Schema<TUser>(
@@ -32,6 +32,11 @@ const UserSchema = new Schema<TUser>(
     },
   emailVerified: { type: Boolean, default: false },
   emailVerificationCode: { type: String },
+  role: {
+      type: String,
+      enum: ["student", "admin","supervisor"],
+      default: "student",
+    }
   },
   { timestamps: true }
 );
@@ -87,5 +92,38 @@ UserSchema.pre("save", function (next) {
 
   next();
 });
+
+
+UserSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
+
+// Add the static methods to the userSchema
+UserSchema.statics.isUserExistsByEmail = async function (email: string) {
+  return await this.findOne({ email }).select('+password');
+};
+
+UserSchema.statics.isPasswordMatched = async function (
+  plainTextPassword: string,
+  hashedPassword: string
+) {
+  return await bcrypt.compare(plainTextPassword, hashedPassword);
+};
+
+UserSchema.statics.isJWTIssuedBeforePasswordChanged = function (
+  passwordChangedTimestamp: number,
+  jwtIssuedTimestamp: number
+) {
+  const passwordChangedTime = new Date(passwordChangedTimestamp).getTime() / 1000;
+  return passwordChangedTime > jwtIssuedTimestamp;
+};
+
+// Export the model with the correct type
+
+
 
 export const userModel = model<TUser>("User", UserSchema);
