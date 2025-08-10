@@ -1,24 +1,25 @@
-import { TCategory } from "./category.interface";
-import { CategoryModel } from "./category.model";
 
-const createCategoryInDB = async (payload: TCategory) => {
-  return await CategoryModel.create(payload);
+import { TExamStep } from "./category.interface";
+import { ExamStepModel } from "./category.model";
+
+const createCategoryInDB = async (payload: TExamStep) => {
+  return await ExamStepModel.create(payload);
 };
 
 const getAllCategoriesFromDB = async () => {
-  return await CategoryModel.find().sort({ createdAt: -1 });
+  return await ExamStepModel.find();
 };
 
 const getSingleCategoryFromDB = async (id: string) => {
-  return await CategoryModel.findById(id);
+  return await ExamStepModel.findById(id);
 };
 
-const updateCategoryFromDB = async (id: string, payload: Partial<TCategory>) => {
-  return await CategoryModel.findByIdAndUpdate(id, payload, { new: true });
+const updateCategoryFromDB = async (id: string, payload: Partial<TExamStep>) => {
+  return await ExamStepModel.findByIdAndUpdate(id, payload, { new: true });
 };
 
 const deleteCategoryFromDB = async (id: string) => {
-  return await CategoryModel.findByIdAndDelete(id);
+  return await ExamStepModel.findByIdAndDelete(id);
 };
 
 export const CategoryServices = {

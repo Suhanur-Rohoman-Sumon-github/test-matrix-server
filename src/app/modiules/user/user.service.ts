@@ -7,7 +7,6 @@ import httpStatus from 'http-status';
 import AppError from '../../error/AppEroor';
 
 import { adminModel } from '../admin/admin.model';
-import { generateAdminId,  } from './user.utils';
 import { TAdmin } from '../admin/admin.interface';
 import { sendEmail } from '../../utils/sendEmail';
 
@@ -79,7 +78,7 @@ const createAdminIntoDB = async (payload: TAdmin) => {
   try {
     session.startTransaction();
     //set  generated id
-    userData.id = await generateAdminId();
+   
 
     // create a user (transaction-1)
     const newUser = await userModel.create([userData], { session });

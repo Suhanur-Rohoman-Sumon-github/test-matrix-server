@@ -23,7 +23,7 @@ const QuestionSchema = new Schema<TQuestions>(
     area: { type: String },
     category: {
       type: Schema.Types.ObjectId,
-      ref: "Category",
+      ref: "ExamStep",
       required: true,
     },
   },

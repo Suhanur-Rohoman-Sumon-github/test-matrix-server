@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { TQuestions } from "./question.interface";
 import { QuestionModel } from "./question.model";
 
@@ -6,14 +7,25 @@ const createQuestionInDB = async (payload: TQuestions) => {
 };
 
 const getAllQuestionsFromDB = async (query: Record<string, unknown>) => {
+  console.log('Query:', query);
+
   const filter: Record<string, unknown> = {};
+
   if (query.category) {
-    filter.category = query.category;
+    try {
+      filter.category = new mongoose.Types.ObjectId(String(query.category));
+    } catch (error) {
+      console.error('Invalid category ID:', query.category);
+    
+      return { data: [], meta: { total: 0 } };
+    }
   }
 
   const questions = await QuestionModel.find(filter)
     .populate("category", "name description")
     .sort({ createdAt: -1 });
+
+  console.log('Questions found:', questions);
 
   const count = await QuestionModel.countDocuments(filter);
   return { data: questions, meta: { total: count } };
